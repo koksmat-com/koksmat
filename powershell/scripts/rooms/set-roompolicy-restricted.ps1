@@ -12,4 +12,5 @@ param (
 
 write-host "Processing" $Mail
 Set-Mailbox $mail  -MailTip $MailTip
-Set-CalendarProcessing $mail  -DeleteComments $false -AutomateProcessing AutoAccept -AllRequestInPolicy $false  -AllBookInPolicy $false -BookInPolicy RestrictedTo -BookingWindowInDays $BookingWindowInDays -ResourceDelegates $null       
+Set-CalendarProcessing $mail  -DeleteComments $false -AutomateProcessing AutoAccept -AllRequestInPolicy $false  -AllBookInPolicy $false -BookInPolicy $restrictedTo -BookingWindowInDays 601 -ResourceDelegates $null       
+  

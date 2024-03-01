@@ -4,11 +4,16 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
+	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/koksmat-com/koksmat/connectors"
 	"github.com/koksmat-com/koksmat/kitchen"
@@ -322,7 +327,7 @@ func init() {
 
 	}))
 
-	runcmd := cmd("run [file]", "Run script", "", func(cmd *cobra.Command, args []string) {
+	runcmd := cmd("run [file]", "Debug script", "", func(cmd *cobra.Command, args []string) {
 
 		filename := UnEscape(args[0])
 		mateContext, err := connectors.GetContext()
@@ -336,9 +341,70 @@ func init() {
 		fmt.Println(result)
 
 	})
-
 	runcmd.Flags().StringVarP(&channelName, "channel", "c", "", "Centrifugo channel to write back on")
 	scriptcmd.AddCommand(runcmd)
+	execcmd := cmd("execute [file]", "Execute script", "", func(cmd *cobra.Command, args []string) {
+
+		filename := UnEscape(args[0])
+		mateContext, err := connectors.GetContext()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		sessionPath, err := kitchen.Cook(false, mateContext.Tenant, kitchenName, stationName, journeyId, filename, nil)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		sessionPath2 := strings.Replace(string(sessionPath), "\n", "", -1)
+		scriptPath := path.Join(string(sessionPath2), "run.ps1")
+
+		ps1, err := os.ReadFile(scriptPath)
+		if err != nil {
+
+			log.Fatalln("could not run powershell script")
+		}
+		code := string(ps1)
+		ps1args := strings.Join(args, " ")
+
+		newcode := strings.ReplaceAll(code, "##ARGS##", ps1args)
+		//log.Println(newcode)
+		err = os.WriteFile(scriptPath, []byte(newcode), 0644)
+
+		if err != nil {
+
+			log.Fatalln("could not run powershell script")
+		}
+
+		oscmd := exec.Command("pwsh", "-f", "run.ps1", "-nologo", "-noprofile")
+
+		oscmd.Dir = sessionPath2
+
+		pipe, _ := oscmd.StdoutPipe()
+		combinedOutput := []byte{}
+
+		err = oscmd.Start()
+		go func(p io.ReadCloser) {
+			reader := bufio.NewReader(pipe)
+			line, err := reader.ReadString('\n')
+			for err == nil {
+				//log.Print(line)
+				combinedOutput = append(combinedOutput, []byte(line)...)
+				line, err = reader.ReadString('\n')
+			}
+		}(pipe)
+		err = oscmd.Wait()
+
+		if err != nil {
+			log.Println(fmt.Sprint(err), sessionPath2) //+ ": " + string(combinedOutput))
+			log.Fatalln("could not run powershell script")
+		}
+
+		fmt.Println(string(combinedOutput))
+
+	})
+	execcmd.Flags().StringVarP(&channelName, "channel", "c", "", "Centrifugo channel to write back on")
+
+	scriptcmd.AddCommand(execcmd)
 	run2cmd := cmd("setup [file]", "Setup script", "", func(cmd *cobra.Command, args []string) {
 
 		filename := UnEscape(args[0])

@@ -145,9 +145,17 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["kitchen","script","run","10-sleep10.ps1","--channel","echo11", "--kitchen","365admin-test","--station","10-basic"]
+            "args": ["kitchen","script","run","20-listmember.ps1","--channel","echo11", "--kitchen","koksmat-mate","--station","30-team-management"]
         }, 
         {
+            "name": "Execute script",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["kitchen","script","execute","20-listmember.ps1","--channel","echo11", "--kitchen","koksmat-mate","--station","30-team-management"]
+        }, 
+        {   
             "name": "Run Exchange Test script",
             "type": "go",
             "request": "launch",

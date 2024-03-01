@@ -134,8 +134,8 @@ func getConnectionsScript(tenant string, connectionString, sessionPath string) (
 	connectScript := ""
 	kitchenRoot := viper.GetString("KITCHENROOT")
 
-	if strings.Index(connectionString, "sharepoint") == -1 {
-		connectionString = fmt.Sprintf("sharepoint,%s", connectionString)
+	if connectionString == "" {
+		connectionString = "sharepoint"
 	}
 	if connectionString != "" {
 		connections := strings.Split(connectionString, ",")
@@ -212,7 +212,7 @@ func Cook(isDebug bool, tenantName string, kitchenName string, stationName strin
 # --------------------------------------
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
-$VerbosePreference = "Continue"
+$VerbosePreference = "SilentlyContinue"
 $DebugPreference = "SilentlyContinue"
 
 %s
