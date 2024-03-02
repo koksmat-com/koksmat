@@ -420,5 +420,23 @@ func init() {
 
 	})
 	scriptcmd.AddCommand(run2cmd)
+	kitchenCmd.AddCommand(
 
+		&cobra.Command{
+			Use:   "boot",
+			Short: "Boot kitchens",
+			Args:  cobra.MinimumNArgs(0),
+			Long:  ``,
+
+			Run: func(cmd *cobra.Command, args []string) {
+
+				err := kitchen.Boot()
+				if err != nil {
+					log.Fatalln(err)
+				}
+
+				// kitchen := args[0]
+
+			},
+		})
 }
