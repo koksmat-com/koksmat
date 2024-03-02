@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/koksmat-com/koksmat/global"
 	"github.com/spf13/cobra"
 )
 
@@ -13,22 +14,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "koksmat",
 	Short: "Kitchen hands help kit",
-	Long: "\033[33m" + `
-		
-##  ###   ## ##   ##  ###   ## ##   ##   ##    ##     #### ##  
-##  ##   ##   ##  ##  ##   ##   ##   ## ##      ##    # ## ##  
-## ##    ##   ##  ## ##    ####     # ### #   ## ##     ##     
-## ##    ##   ##  ## ##     #####   ## # ##   ##  ##    ##     
-## ###   ##   ##  ## ###       ###  ##   ##   ## ###    ##     
-##  ##   ##   ##  ##  ##   ##   ##  ##   ##   ##  ##    ##     
-##  ###   ## ##   ##  ###   ## ##   ##   ##  ###  ##   ####    
-` +
-		"\033[0m" + `
-koksmat is a CLI library. It provides the commands to deal with batch orientated jobs.
-                                                               
-
-	
-	`,
+	Long:  global.Logo,
 	// Uncomment the following line if your bare application
 	// has an action associated  with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

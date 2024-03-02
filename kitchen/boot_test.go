@@ -33,7 +33,7 @@ func TestCreateNoneDefaultEnvFile(t *testing.T) {
 }
 
 func TestBoot(t *testing.T) {
-	err := Boot()
+	err := Boot(BootOptions{Verbose: true})
 	if err != nil {
 		t.Error(err)
 	}

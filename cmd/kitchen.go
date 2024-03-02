@@ -26,6 +26,7 @@ var stationName string
 var channelName string
 var tenantName string = "365adm"
 var journeyId string
+var verbose bool = false
 
 func UnEscape(s string) string {
 	ss, err := url.QueryUnescape(s)
@@ -420,23 +421,25 @@ func init() {
 
 	})
 	scriptcmd.AddCommand(run2cmd)
-	kitchenCmd.AddCommand(
+	bootCmd := &cobra.Command{
+		Use:   "boot",
+		Short: "Boot kitchens",
+		Args:  cobra.MinimumNArgs(0),
+		Long:  ``,
 
-		&cobra.Command{
-			Use:   "boot",
-			Short: "Boot kitchens",
-			Args:  cobra.MinimumNArgs(0),
-			Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
 
-			Run: func(cmd *cobra.Command, args []string) {
+			err := kitchen.Boot(kitchen.BootOptions{Verbose: verbose})
+			if err != nil {
+				log.Fatalln(err)
+			}
 
-				err := kitchen.Boot()
-				if err != nil {
-					log.Fatalln(err)
-				}
+			// kitchen := args[0]
 
-				// kitchen := args[0]
+		},
+	}
+	kitchenCmd.AddCommand(bootCmd)
 
-			},
-		})
+	bootCmd.Flags().BoolVarP(&verbose, "verbose", "", false, "Verbose")
+
 }

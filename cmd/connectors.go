@@ -8,7 +8,7 @@ import (
 	"log"
 
 	"github.com/koksmat-com/koksmat/connectors"
-	"github.com/koksmat-com/koksmat/stores"
+
 	"github.com/spf13/cobra"
 )
 
@@ -49,10 +49,6 @@ var connectorCmd = &cobra.Command{
 			printData(connectors.M365Context())
 		case "microsoft365/sites":
 			printData(connectors.M365Sites())
-		case "mongodb/clusters":
-			printData(stores.PerconaCRDS())
-		case "mongodb/databases":
-			printData(stores.Databases())
 		default:
 
 			log.Fatalln("Unknown ", path)

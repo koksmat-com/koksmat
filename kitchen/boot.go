@@ -1,16 +1,21 @@
 package kitchen
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"path"
 
 	"github.com/fatih/color"
+	"github.com/koksmat-com/koksmat/global"
 	"github.com/spf13/viper"
 )
 
 var verbose bool = false
 
-var yellow = color.New(color.FgHiYellow).PrintlnFunc()
+var yellow = color.New(color.FgYellow).PrintlnFunc()
+
+var green = color.New(color.FgGreen).PrintlnFunc()
 
 func verboseLog(s ...interface{}) {
 	if verbose {
@@ -87,21 +92,37 @@ func createDefaultEnvFile(envFileName string) (string, error) {
 	return defaultEnvFilepath, nil
 }
 
-func Boot() error {
+type BootOptions struct {
+	Verbose bool
+}
 
+func logo() {
+	fmt.Println(global.Logo)
+}
+
+func checkEnv() {
 	envFilePath, err := envFileCheck()
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	if envFilePath == "" {
 		configPath, err := createDefaultEnvFile(".env")
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 		viper.SetConfigFile(configPath)
 	}
+}
+
+func setup(options BootOptions) {
+	verbose = options.Verbose
+
+}
+func Boot(options BootOptions) error {
+	setup(options)
+	checkEnv()
 	kitchenRoot := viper.GetString("KITCHENROOT")
-	yellow("Kitchen root is", kitchenRoot)
+	verboseLog("Kitchen root is", kitchenRoot)
 
 	return nil
 }
