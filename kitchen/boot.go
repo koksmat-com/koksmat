@@ -81,7 +81,11 @@ func createDefaultEnvFile(envFileName string) (string, error) {
 		if err != nil {
 			verboseLog("Creating file")
 			yellow("Creating default .env file at", defaultEnvFilepath)
-			os.WriteFile(path.Join(kitchenRoot, envFileName), []byte(defaultEnvironment), 0644)
+			err = os.WriteFile(defaultEnvFilepath, []byte(defaultEnvironment), 0644)
+			if err != nil {
+				color.Red("Error creating default .env file")
+				os.Exit(1)
+			}
 
 		}
 
@@ -120,6 +124,7 @@ func setup(options BootOptions) {
 }
 func Boot(options BootOptions) error {
 	setup(options)
+	logo()
 	checkEnv()
 	kitchenRoot := viper.GetString("KITCHENROOT")
 	verboseLog("Kitchen root is", kitchenRoot)
