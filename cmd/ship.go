@@ -4,12 +4,13 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 
 	"github.com/koksmat-com/koksmat/kitchen"
 
@@ -103,6 +104,7 @@ func getPackageNameFromURL(url string) string {
 }
 
 func shipGetCmd(cmd *cobra.Command, args []string) {
+	color.White("Downloading mate")
 	kitchenRoot := viper.GetString("KITCHENROOT")
 	packagePath := path.Join(kitchenRoot, ".koksmat", "packages")
 
@@ -114,22 +116,34 @@ func shipGetCmd(cmd *cobra.Command, args []string) {
 	kitchen.Download(url, dest)
 	err := Unzip(dest, packagePath, "koksmat-mate")
 	if err != nil {
-		fmt.Println(err)
+		color.Red(err.Error())
+		return
 	}
+	color.White("Installing packages")
 	execCmd := exec.Command("pnpm", "install")
 	execCmd.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
-	execResult := execCmd.Run()
-	if execResult.Error() != "" {
-		log.Fatal(execResult.Error())
+	result, err := execCmd.CombinedOutput()
+
+	if err != nil {
+		color.Red(string(result))
 		return
+
 	}
+	//	color.White(string(result))
+
+	color.White("Building")
 	execCmd2 := exec.Command("pnpm", "build")
 	execCmd2.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
-	execResult = execCmd2.Run()
-	if execResult.Error() != "" {
-		log.Fatal(execResult.Error())
+	result2, err := execCmd2.CombinedOutput()
+	if err != nil {
+		color.Red(string(result2))
 		return
+
 	}
+	//color.White(string(result2))
+	color.White("Mate ready to launch - run")
+	color.Green("koksmat sail")
+
 }
 func init() {
 

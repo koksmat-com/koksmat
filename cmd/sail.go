@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"bufio"
+	"io"
 	"log"
 	"os/exec"
 	"path"
@@ -18,10 +20,21 @@ func sail() {
 
 	execCmd := exec.Command("pnpm", "start")
 	execCmd.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
-	execResult := execCmd.Run()
-	if execResult.Error() != "" {
-		log.Fatal(execResult.Error())
-		return
+	pipe, _ := execCmd.StdoutPipe()
+	err := execCmd.Start()
+	go func(p io.ReadCloser) {
+		reader := bufio.NewReader(pipe)
+		line, err := reader.ReadString('\n')
+		for err == nil {
+			log.Print(line)
+
+			line, err = reader.ReadString('\n')
+		}
+	}(pipe)
+	err = execCmd.Wait()
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	//filename := UnEscape(args[0])

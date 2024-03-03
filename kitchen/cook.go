@@ -303,7 +303,7 @@ func Download(url string, destFilePath string) error {
 	}
 
 	defer resp.Body.Close()
-	fmt.Println("status", resp.Status)
+
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Failed to download file %s", url)
 	}
