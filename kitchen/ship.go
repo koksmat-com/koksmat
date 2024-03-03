@@ -16,7 +16,7 @@ func Ship(kitchenName string) (string, error) {
 	kitchenPath := path.Join(root, kitchenName)
 	goModPath := path.Join(kitchenPath, "go.mod")
 
-	if !fileExists(goModPath) {
+	if !FileExists(goModPath) {
 		return "", fmt.Errorf("go.mod not found in %s", kitchenPath)
 	}
 	fileContent, err := os.ReadFile(goModPath)

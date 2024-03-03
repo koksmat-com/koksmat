@@ -128,7 +128,7 @@ func ParseMarkdownGetMetadata(parentPath string, content string) (Metadata, erro
 func ReadMarkdown(dontrenderMarkdown bool, pathname string, filename string) (string, Metadata, error) {
 
 	filepath := filepath.Join(pathname, filename)
-	if !fileExists(filepath) {
+	if !FileExists(filepath) {
 		return "", nil, nil
 	}
 	fileContent, err := os.ReadFile(filepath)

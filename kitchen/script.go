@@ -98,7 +98,7 @@ func ParseGoFile(fileContent string) (string, error) {
 }
 func ReadMarkdownFromPowerShell(filepath string) (string, []string, error) {
 
-	if !fileExists(filepath) {
+	if !FileExists(filepath) {
 		return "", nil, nil
 	}
 	fileContent, err := os.ReadFile(filepath)
@@ -110,7 +110,7 @@ func ReadMarkdownFromPowerShell(filepath string) (string, []string, error) {
 
 func ReadMarkdownFromGo(filepath string) (string, error) {
 
-	if !fileExists(filepath) {
+	if !FileExists(filepath) {
 		return "", fmt.Errorf("File %s not found", filepath)
 	}
 	fileContent, err := os.ReadFile(filepath)

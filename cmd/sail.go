@@ -5,10 +5,27 @@ package cmd
 
 import (
 	"log"
+	"os/exec"
+	"path"
 
-	"github.com/koksmat-com/koksmat/connectors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+func sail() {
+	kitchenRoot := viper.GetString("KITCHENROOT")
+	packagePath := path.Join(kitchenRoot, ".koksmat", "packages")
+
+	execCmd := exec.Command("pnpm", "start")
+	execCmd.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
+	execResult := execCmd.Run()
+	if execResult.Error() != "" {
+		log.Fatal(execResult.Error())
+		return
+	}
+
+	//filename := UnEscape(args[0])
+}
 
 // serveCmd represents the serve command
 var sailCmd = &cobra.Command{
@@ -20,10 +37,7 @@ var sailCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		log.Println("Sailing")
-		connectors.Execute("open", connectors.Options{Dir: "/Users/nielsgregersjohansen/servers/mate/apps/www"}, "http://localhost:3010")
-
-		connectors.Execute("npm", connectors.Options{Dir: "/Users/nielsgregersjohansen/servers/mate/apps/www"}, "run", "start")
-
+		sail()
 		// restapi.Sail()
 		//webserver.Run()
 	},

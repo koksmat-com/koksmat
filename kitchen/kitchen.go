@@ -38,7 +38,7 @@ func CreateKitchen(name string) error {
 
 	readmeFilePath := path.Join(kitchenPath, "readme.md")
 
-	if fileExists(readmeFilePath) {
+	if FileExists(readmeFilePath) {
 		return fmt.Errorf("kitchen %s already exists", name)
 	}
 	data := fmt.Sprintf(`---
@@ -68,7 +68,7 @@ func BuildKitchen(name string) error {
 
 	goFilePath := path.Join(kitchenPath, "main.go")
 
-	if fileExists(goFilePath) {
+	if FileExists(goFilePath) {
 		_, err := connectors.Execute("go", *&connectors.Options{Dir: kitchenPath}, "install")
 		if err != nil {
 			return err

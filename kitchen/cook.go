@@ -2,6 +2,8 @@ package kitchen
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -37,12 +39,12 @@ func getEnvironmentFilePath(startPath string, tenantName string) (string, error)
 	}
 
 	tenantenvPath := path.Join(startPath, fmt.Sprintf(".env-%s", tenantName))
-	if fileExists(tenantenvPath) {
+	if FileExists(tenantenvPath) {
 		return tenantenvPath, nil
 	}
 
 	envPath := path.Join(startPath, ".env")
-	if fileExists(envPath) {
+	if FileExists(envPath) {
 		return envPath, nil
 	}
 	startPath = path.Dir(startPath)
@@ -72,7 +74,7 @@ func getEnvironmentStack(endPath string, index int, stack []environmentStack) ([
 		}
 	}
 	envPath := path.Join(startPath, ".env")
-	if fileExists(envPath) {
+	if FileExists(envPath) {
 		env, err := ReadEnvironmentVariables(envPath)
 		if err != nil {
 			return nil, err
@@ -90,7 +92,7 @@ func getEnvironmentStack(endPath string, index int, stack []environmentStack) ([
 
 func ReadEnvironmentVariables(filepath string) ([]string, error) {
 
-	if !fileExists(filepath) {
+	if !FileExists(filepath) {
 		return nil, nil
 	}
 	fileContent, err := os.ReadFile(filepath)
@@ -142,7 +144,7 @@ func getConnectionsScript(tenant string, connectionString, sessionPath string) (
 		for _, connection := range connections {
 			connection := strings.TrimSpace(connection)
 			connectionPath := path.Join(kitchenRoot, ".koksmat", "tenants", tenant, connection)
-			if !fileExists(path.Join(connectionPath, "connect.ps1")) {
+			if !FileExists(path.Join(connectionPath, "connect.ps1")) {
 				return "", fmt.Errorf("Connection %s not found for tenant %s", connection, tenant)
 			}
 			CreateIfNotExists(path.Join(sessionPath, connection), 0755)
@@ -292,4 +294,31 @@ func Open(kitchenName string, args ...string) (string, error) {
 
 func Launch(kitchenName string, args ...string) (string, error) {
 	return KitchenCommand(kitchenName, kitchenName, "-h")
+}
+
+func Download(url string, destFilePath string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	fmt.Println("status", resp.Status)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Failed to download file %s", url)
+	}
+
+	// Create the file
+	out, err := os.Create(destFilePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+	return nil
 }
