@@ -194,7 +194,7 @@ func init() {
 
 		&cobra.Command{
 			Use:   "create [kitchen]",
-			Short: "Create a new kitchen and change the current path to that",
+			Short: "Create a new kitchen",
 			Args:  cobra.MinimumNArgs(1),
 			Long:  ``,
 
