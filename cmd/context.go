@@ -24,7 +24,7 @@ func testContext() error {
 	context := `
 {
 	"current": {
-		"tenant": "default",
+		"tenant": "default"
 	},
 	
 	"sharepoint": [
