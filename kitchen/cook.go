@@ -216,6 +216,7 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 $VerbosePreference = "SilentlyContinue"
 $DebugPreference = "SilentlyContinue"
+$PSStyle.OutputRendering = [System.Management.Automation.OutputRendering]::PlainText;
 
 %s
 $ENV:WORKDIR="%s"
