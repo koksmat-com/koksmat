@@ -17,7 +17,6 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/util"
-	"go.abhg.dev/goldmark/mermaid"
 )
 
 func GetMetadataProperty(meta map[string]interface{}, key string, defaultValue string) string {
@@ -96,10 +95,10 @@ func ParseMarkdownGetMetadata(parentPath string, content string) (Metadata, erro
 	context := parser.NewContext()
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM, meta.Meta),
-		goldmark.WithExtensions(&mermaid.Extender{
-			RenderMode: mermaid.RenderModeServer,
-			CLI:        mermaid.MMDC("/usr/local/bin/mmdc"),
-		}),
+		// goldmark.WithExtensions(&mermaid.Extender{
+		// 	RenderMode: mermaid.RenderModeServer,
+		// 	CLI:        mermaid.MMDC("/usr/local/bin/mmdc"),
+		// }),
 		goldmark.WithExtensions(img64.Img64),
 		goldmark.WithRendererOptions(img64.WithParentPath(parentPath)),
 		goldmark.WithParserOptions(
