@@ -136,9 +136,9 @@ func getConnectionsScript(tenant string, connectionString, sessionPath string) (
 	connectScript := ""
 	kitchenRoot := viper.GetString("KITCHENROOT")
 
-	if connectionString == "" {
-		connectionString = "sharepoint"
-	}
+	// if connectionString == "" {
+	// 	connectionString = "sharepoint"
+	// }
 	if connectionString != "" {
 		connections := strings.Split(connectionString, ",")
 		for _, connection := range connections {
@@ -224,30 +224,15 @@ $ENV:MILLERJOURNEY="%s"
 $ENV:KITCHEN="%s"
 Start-Transcript -Path "$PSScriptRoot/transcript.txt" -Append
 $result=""
-write-host "Running script"
+
+write-host "##START##"
+write-host "##START##"
 %s
 . $PSScriptRoot/script.ps1 ##ARGS##  
 Out-File -InputObject $result  -FilePath $PSScriptRoot/output.txt -Encoding:utf8NoBOM
+# write-host "##STOP##"
 Stop-Transcript
-return # the remaining code is not executed in the current session
-$libraryName = "Miller Sessions"
-Connect-PnPOnline -Url $ENV:SITEURL  -ClientId $PNPAPPID -Tenant $PNPTENANTID -CertificatePath "$PNPCERTIFICATEPATH"
 
-New-PnPList -Title $libraryName -Template DocumentLibrary -ErrorAction SilentlyContinue
-Add-PnPFolder -Name $env:KITCHEN -Folder $libraryName -ErrorAction SilentlyContinue
-Add-PnPFolder -Name $env:MILLERJOURNEY -Folder "$($libraryName)/$($env:KITCHEN)" -ErrorAction SilentlyContinue
-
-Add-PnPFolder -Name $env:MILLERSESSIONID -Folder "$($libraryName)/$($env:KITCHEN)/$($env:MILLERJOURNEY)" -ErrorAction SilentlyContinue
-
-$files = Get-ChildItem -Path "$env:WORKDIR" -Filter *.json 
-foreach ($file in $files) {
-    Add-PnPFile -Path $file.FullName -Folder "$($libraryName)/$($env:KITCHEN)/$($env:MILLERJOURNEY)" 
-    
-}
-Add-PnPFile -Path "$PSScriptRoot/output.txt" -Folder "$($libraryName)/$($env:KITCHEN)/$($env:MILLERJOURNEY)/$($env:MILLERSESSIONID)" 
-Add-PnPFile -Path "$PSScriptRoot/script.ps1" -Folder "$($libraryName)/$($env:KITCHEN)/$($env:MILLERJOURNEY)/$($env:MILLERSESSIONID)" 
-Add-PnPFile -Path "$PSScriptRoot/transcript.txt" -Folder "$($libraryName)/$($env:KITCHEN)/$($env:MILLERJOURNEY)/$($env:MILLERSESSIONID)" 
-    
 
 
 `, psEnv, workDir, sessionId, journeyId, kitchenName, connectScript)
