@@ -57,10 +57,10 @@ func ParseMarkdown(noRender bool, parentPath string, content string) (string, Me
 	context := parser.NewContext()
 	md := goldmark.New(
 		goldmark.WithExtensions(extension.GFM, meta.Meta),
-		goldmark.WithExtensions(&mermaid.Extender{
-			RenderMode: mermaid.RenderModeServer,
-			CLI:        mermaid.MMDC("/usr/local/bin/mmdc"),
-		}),
+		// goldmark.WithExtensions(&mermaid.Extender{
+		// 	RenderMode: mermaid.RenderModeServer,
+		// 	CLI:        mermaid.MMDC("/usr/local/bin/mmdc"),
+		// }),
 		goldmark.WithExtensions(img64.Img64),
 		goldmark.WithRendererOptions(img64.WithParentPath(parentPath)),
 		goldmark.WithParserOptions(
