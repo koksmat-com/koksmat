@@ -14,21 +14,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-func runCommand(command string, args ...string) {
+func runCommand(command string, args ...string) error {
 	execCmd := exec.Command(command, args...)
 
-	output, err := execCmd.CombinedOutput()
+	_, err := execCmd.CombinedOutput()
+	return err
 
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print(string(output))
 }
 
 func sail() {
 	kitchenRoot := viper.GetString("KITCHENROOT")
 	packagePath := path.Join(kitchenRoot, ".koksmat", "packages")
-	runCommand("open", "http://localhost:3000")
+	runErr := runCommand("open", "http://localhost:3000")
+	if runErr != nil { // windows
+		runCommand("start", "http://localhost:3000")
+	}
+
 	execCmd := exec.Command("pnpm", "start")
 	execCmd.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
 	pipe, _ := execCmd.StdoutPipe()
