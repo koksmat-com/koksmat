@@ -122,6 +122,7 @@ func shipGetCmd(cmd *cobra.Command, args []string) {
 	color.White("Installing packages")
 	installPnpm := exec.Command("npm", "install", "-g", "pnpm")
 	installPnpm.CombinedOutput()
+
 	execCmd := exec.Command("pnpm", "install")
 	execCmd.Dir = path.Join(packagePath, "koksmat-mate", ".koksmat", "web")
 	result, err := execCmd.CombinedOutput()
