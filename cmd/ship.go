@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"archive/zip"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -148,9 +150,102 @@ func shipGetCmd(cmd *cobra.Command, args []string) {
 	color.Green("koksmat sail")
 
 }
+
+type KoksmatManifest struct {
+	Version struct {
+		Minor int `json:"minor"`
+		Build int `json:"build"`
+		Patch int `json:"patch"`
+		Major int `json:"major"`
+	} `json:"version"`
+	Appname   string   `json:"appname"`
+	Dnsprod   string   `json:"dnsprod"`
+	Dnstest   string   `json:"dnstest"`
+	Imagename string   `json:"imagename"`
+	Port      int      `json:"port"`
+	Packages  []string `json:"packages"`
+}
+
+func ReadManifest(manifestPath string) (*KoksmatManifest, error) {
+	jsonFile, err := os.ReadFile(manifestPath)
+	if err != nil {
+
+		return nil, err
+	}
+
+	// Define a variable to hold the unmarshaled JSON data
+	var manifest KoksmatManifest
+
+	// Unmarshal the JSON data into the Manifest structure
+	if err := json.Unmarshal(jsonFile, &manifest); err != nil {
+
+		return nil, err
+	}
+
+	return &manifest, nil
+
+}
+
+func BuildUrlFromPackage(packageName string) string {
+	// name is stored in the format "magicbutton/magic-mix:
+	orgRepo := strings.Split(packageName, ":")[0]
+	org := strings.Split(orgRepo, "/")[0]
+	repo := strings.Split(orgRepo, "/")[1]
+	version := strings.Split(packageName, ":")[1]
+
+	return fmt.Sprintf("https://github.com/%s/%s/archive/refs/tags/v%s.zip", org, repo, version)
+}
+func Install() error {
+
+	manifest, err := ReadManifest(path.Join(".", ".koksmat", "koksmat.json"))
+	if err != nil {
+
+		return err
+	}
+
+	packagePath := path.Join(".", ".koksmat", "packages")
+	kitchen.CreateIfNotExists(packagePath, 0755)
+	for _, packageName := range manifest.Packages {
+
+		gitUrl := BuildUrlFromPackage(packageName)
+		repo := strings.Split(strings.Split(packageName, ":")[0], "/")[1]
+		dest := path.Join(packagePath, fmt.Sprintf("%s.zip", repo))
+		err := kitchen.Download(gitUrl, dest)
+		if err != nil {
+			return err
+		}
+
+		err = Unzip(dest, packagePath, repo)
+		if err != nil {
+			return err
+
+		}
+		execCmd := exec.Command("go", "install")
+		execCmd.Dir = path.Join(packagePath, repo, ".koksmat", "app")
+		output, err := execCmd.CombinedOutput()
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(output))
+
+	}
+
+	return nil
+}
+
+func shipInstallCmd(cmd *cobra.Command, args []string) {
+	color.White("Installing packages")
+	err := Install()
+	if err != nil {
+		color.Red(err.Error())
+		log.Fatal(err)
+	}
+	color.Green("Packages installed")
+}
 func init() {
 
 	rootCmd.AddCommand(shipCmd)
 	shipCmd.AddCommand(shipSubCmd("get [package]", "Get package", "", 1, shipGetCmd))
+	shipCmd.AddCommand(shipSubCmd("install ", "Install packages", "", 1, shipInstallCmd))
 
 }
