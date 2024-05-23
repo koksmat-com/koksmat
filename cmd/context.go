@@ -125,6 +125,17 @@ Connect-PnPOnline -Url $PNPSITE  -ClientId $PNPAPPID -Tenant $PNPTENANTID -Certi
 	},
 }
 
+var kitchenRootCmd = &cobra.Command{
+	Use:   "kitchenRoot",
+	Short: "kitchenRoot ",
+	Long:  ``,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		kitchenRoot := viper.GetString("KITCHENROOT")
+		fmt.Println(kitchenRoot)
+	},
+}
+
 func init() {
 	var contextCmd = &cobra.Command{
 		Use:   "context",
@@ -132,5 +143,5 @@ func init() {
 		Long:  ``}
 	rootCmd.AddCommand(contextCmd)
 	contextCmd.AddCommand(initCmd)
-
+	contextCmd.AddCommand(kitchenRootCmd)
 }

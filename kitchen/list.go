@@ -35,7 +35,7 @@ func wrapperRenderer(w util.BufWriter, ctx highlighting.CodeBlockContext, enteri
 	// code block with a language
 	if ok && lang != "" {
 		if entering {
-			w.WriteString(`<div style="border-radius:10px; background-color: #282a36;padding:20px;margin-top:20px;margin-bottom:20px;overflow-x:auto" data-lang=` + lang + ">")
+			w.WriteString(`<div classname="markdownhighlight" style="border-radius:10px; background-color: #282a36;padding:10px; padding-left:40px;margin-top:10px;margin-bottom:10px;overflow-x:auto" data-lang=` + lang + ">")
 		} else {
 			w.WriteString(`</div>`)
 		}

@@ -1,8 +1,8 @@
 # Koksmat
 
-The name `koksmat` is a Danish word that translates into the assistant to a chef on a ship. The Koksmat is responsible for preparing the food and keeping the kitchen clean. 
+The name `koksmat` is a Danish word that translates into the assistant to a chef on a ship. The Koksmat is responsible for preparing the food and keeping the kitchen clean.
 
-So see `koksmat` as you assistanct in your kitchen. 
+So see `koksmat` as you assistanct in your kitchen.
 
 `koksmat` like to have a clear set of rules on how the kitchen is organized, where the secret ingredients are stored, and how to prepare the food.
 
@@ -36,13 +36,13 @@ Running `koksmat` will show you a list of available commands.
 koksmat
 
 
-##  ###   ## ##   ##  ###   ## ##   ##   ##    ##     #### ##  
-##  ##   ##   ##  ##  ##   ##   ##   ## ##      ##    # ## ##  
-## ##    ##   ##  ## ##    ####     # ### #   ## ##     ##     
-## ##    ##   ##  ## ##     #####   ## # ##   ##  ##    ##     
-## ###   ##   ##  ## ###       ###  ##   ##   ## ###    ##     
-##  ##   ##   ##  ##  ##   ##   ##  ##   ##   ##  ##    ##     
-##  ###   ## ##   ##  ###   ## ##   ##   ##  ###  ##   ####    
+##  ###   ## ##   ##  ###   ## ##   ##   ##    ##     #### ##
+##  ##   ##   ##  ##  ##   ##   ##   ## ##      ##    # ## ##
+## ##    ##   ##  ## ##    ####     # ### #   ## ##     ##
+## ##    ##   ##  ## ##     #####   ## # ##   ##  ##    ##
+## ###   ##   ##  ## ###       ###  ##   ##   ## ###    ##
+##  ##   ##   ##  ##  ##   ##   ##  ##   ##   ##  ##    ##
+##  ###   ## ##   ##  ###   ## ##   ##   ##  ###  ##   ####
 
 
 Usage:
@@ -50,9 +50,9 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
-  connector   connector  
+  connector   connector
   help        Help about any command
-  kitchen     kitchen  
+  kitchen     kitchen
   sail        Auto pilot mode
 
 Flags:
@@ -82,7 +82,7 @@ Usage:
 Available Commands:
   boot        Boot kitchens
   build       Build kitchen
-  create      Create a new kitchen 
+  create      Create a new kitchen
   launch      Launch kitchen
   open        Open kitchen
   script      Working with scripts
@@ -94,3 +94,11 @@ Flags:
 
 Use "koksmat kitchen [command] --help" for more information about a command.
 ```
+
+Install-Module -Name PnP.PowerShell -Force -AllowClobber
+Install-Module -Name ExchangeOnlineManagement -force
+koksmat ship get mate
+cp .koksmat/kitchenroot/\* .. -r
+cp .koksmat/kitchenroot/.koksmat .. -r
+echo #x > ../.env
+koksmat sail

@@ -1,6 +1,7 @@
 package tracing
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -23,6 +24,7 @@ func ShipNats(args []string) error {
 	return nc.Publish(subject, []byte(data))
 }
 func Log(args []string) {
+	fmt.Println(args)
 	err := ShipNats(args)
 	if err != nil {
 		log.Println("Cannot ship data to NATS", err)
