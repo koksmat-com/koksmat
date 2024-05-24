@@ -232,8 +232,36 @@ func Install() error {
 
 	return nil
 }
+func SetupConnectors(kitchenRoot string) error {
+	url := "https://github.com/koksmat-com/.koksmat/archive/refs/heads/master.zip"
+	color.White("Setting up connectors")
+	dest := ".koksmatroot.zip"
+	kitchen.Download(url, dest)
+	if kitchenRoot == "" {
+		kitchenRoot = viper.GetString("KITCHENROOT")
+		if kitchenRoot == "" {
+			kitchenRoot = "/kitchens"
+		}
+	}
+	kitchen.CreateIfNotExists(kitchenRoot, 0755)
 
+	err := Unzip(dest, kitchenRoot, ".koksmat")
+	if err != nil {
+		return err
+
+	}
+	return nil
+}
 func shipInstallCmd(cmd *cobra.Command, args []string) {
+	color.White("Installing packages")
+	err := Install()
+	if err != nil {
+		color.Red(err.Error())
+		log.Fatal(err)
+	}
+	color.Green("Packages installed")
+}
+func shipInitCmd(cmd *cobra.Command, args []string) {
 	color.White("Installing packages")
 	err := Install()
 	if err != nil {
@@ -245,7 +273,8 @@ func shipInstallCmd(cmd *cobra.Command, args []string) {
 func init() {
 
 	rootCmd.AddCommand(shipCmd)
-	shipCmd.AddCommand(shipSubCmd("get [package]", "Get package", "", 1, shipGetCmd))
-	shipCmd.AddCommand(shipSubCmd("install ", "Install packages", "", 1, shipInstallCmd))
+	shipCmd.AddCommand(shipSubCmd("get", "Get package", "", 0, shipGetCmd))
+	shipCmd.AddCommand(shipSubCmd("install ", "Install packages", "", 0, shipInstallCmd))
+	shipCmd.AddCommand(shipSubCmd("init ", "Install packages", "", 0, shipInitCmd))
 
 }
