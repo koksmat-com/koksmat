@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	cp "github.com/otiai10/copy"
 )
@@ -75,6 +76,10 @@ func CopyDirectory(scrDir string, dest string) error {
 }
 
 func Copy(srcFile, dstFile string) error {
+
+	// get parent directory from dstFile
+	parentDir := filepath.Dir(dstFile)
+	CreateIfNotExists(parentDir, 0755)
 	out, err := os.Create(dstFile)
 	if err != nil {
 		return err
