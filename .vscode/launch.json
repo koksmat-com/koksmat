@@ -195,7 +195,15 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "args": ["excel","-f","/Users/nielsgregersjohansen/code/koksmat/koksmat-cli/excel/nexi.xlsx"]
-        }
+        }, 
+        {
+         "name": "Compare Kitchens",
+         "type": "go",
+         "request": "launch",
+         "mode": "auto",
+         "program": "${workspaceFolder}",
+         "args": ["kitchen","compare","web","magic-people","magic-files"]
+     }
     ]
    
 }

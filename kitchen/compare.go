@@ -3,16 +3,22 @@ package kitchen
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
 // FileDiff represents the differences between two folders
+
+type FileDiffPair struct {
+	Master  string
+	Replica string
+}
 type FileDiff struct {
+	Root               string
 	FilesOnlyInMaster  []string
 	FilesOnlyInReplica []string
-	DifferentFiles     []string
+
+	DifferentFiles []FileDiffPair
 }
 
 // Walks through the folder and populates the files map
@@ -35,7 +41,7 @@ func walkFolder(folderPath string, recurse bool) map[string]bool {
 	if recurse {
 		filepath.Walk(folderPath, fileWalker)
 	} else {
-		fileInfos, _ := ioutil.ReadDir(folderPath)
+		fileInfos, _ := os.ReadDir(folderPath)
 		for _, fileInfo := range fileInfos {
 			if !fileInfo.IsDir() {
 				relPath := fileInfo.Name()
@@ -57,12 +63,13 @@ func compareFolders(masterPath, replicaPath string, recurse bool) FileDiff {
 	// Compare master and replica files
 	for file := range masterFiles {
 		if !replicaFiles[file] {
-			diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, file)
+			diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, filepath.Join(masterPath, file))
 		} else {
-			masterContent, _ := ioutil.ReadFile(filepath.Join(masterPath, file))
-			replicaContent, _ := ioutil.ReadFile(filepath.Join(replicaPath, file))
+			masterContent, _ := os.ReadFile(filepath.Join(masterPath, file))
+			replicaContent, _ := os.ReadFile(filepath.Join(replicaPath, file))
 			if string(masterContent) != string(replicaContent) {
-				diff.DifferentFiles = append(diff.DifferentFiles, file)
+				pair := FileDiffPair{Master: filepath.Join(masterPath, file), Replica: filepath.Join(replicaPath, file)}
+				diff.DifferentFiles = append(diff.DifferentFiles, pair)
 			}
 		}
 	}
@@ -70,7 +77,7 @@ func compareFolders(masterPath, replicaPath string, recurse bool) FileDiff {
 	// Files present only in replica folder
 	for file := range replicaFiles {
 		if !masterFiles[file] {
-			diff.FilesOnlyInReplica = append(diff.FilesOnlyInReplica, file)
+			diff.FilesOnlyInReplica = append(diff.FilesOnlyInReplica, filepath.Join(replicaPath, file))
 		}
 	}
 
@@ -111,12 +118,15 @@ func Merge(srcFile, dstFile string) error {
 	return nil
 }
 
-func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse bool, action CompareOptions) (map[string]FileDiff, error) {
+func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse bool, action CompareOptions) ([]*FileDiff, error) {
 
 	// Define subfolders to compare
 
 	// Map to store comparison results
 	comparisonResults := make(map[string]FileDiff)
+
+	// setup an array to store the results
+	result := []*FileDiff{}
 
 	// Iterate over each subfolder
 	for _, subfolder := range subfolders {
@@ -128,7 +138,9 @@ func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse
 		diff := compareFolders(masterSubfolder, replicaSubfolder, recurse)
 
 		// Store the comparison result in the map
-		comparisonResults[subfolder] = diff
+		fd := &FileDiff{Root: subfolder, FilesOnlyInMaster: diff.FilesOnlyInMaster, FilesOnlyInReplica: diff.FilesOnlyInReplica, DifferentFiles: diff.DifferentFiles}
+		result = append(result, fd)
+
 	}
 
 	if action.PrintResults {
@@ -168,9 +180,7 @@ func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse
 			for _, file := range diff.DifferentFiles {
 				// Copy file from master to replica
 
-				masterFile := filepath.Join(masterRoot, subfolder, file)
-				replicaFile := filepath.Join(replicaRoot, subfolder, file)
-				fmt.Printf("code --diff '%s' '%s'\n", masterFile, replicaFile)
+				fmt.Printf("code --diff '%s' '%s'\n", file.Master, file.Replica)
 
 			}
 		}
@@ -178,15 +188,13 @@ func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse
 			for _, file := range diff.DifferentFiles {
 				// Copy file from master to replica
 
-				masterFile := filepath.Join(masterRoot, subfolder, file)
-				replicaFile := filepath.Join(replicaRoot, subfolder, file)
 				// Read master file content
-				action.MergeFunction(masterFile, replicaFile)
+				action.MergeFunction(file.Master, file.Replica)
 
 			}
 		}
 		fmt.Println()
 	}
 
-	return comparisonResults, nil
+	return result, nil
 }

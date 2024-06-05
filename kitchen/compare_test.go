@@ -1,6 +1,9 @@
 package kitchen
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"path"
 	"testing"
 
@@ -11,7 +14,7 @@ func TestCompareKitchens(t *testing.T) {
 	t.Log("Compare")
 	root := viper.GetString("KITCHENROOT")
 	master := path.Join(root, "magic-people")
-	replica := path.Join(root, "magic-mix")
+	replica := path.Join(root, "magic-files")
 	subfolders := []string{".koksmat/web/koksmat", ".koksmat/web/app/magic/components"} // , ".koksmat/web/koksmat/msal"}
 
 	_, err := Compare(master, replica, subfolders, true, *&CompareOptions{
@@ -23,17 +26,32 @@ func TestCompareKitchens(t *testing.T) {
 		t.Errorf("Error: %v", err)
 	}
 }
+
+func printJSON(v any) {
+	j, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		log.Println(err)
+	}
+	s := string(j)
+	fmt.Print(s)
+	// err = clipboard.Init()
+	// if err == nil {
+	// 	clipboard.Write(clipboard.FmtText, []byte(s))
+	// }
+
+}
 func TestCompareKitchens2(t *testing.T) {
 	t.Log("Compare")
 	root := viper.GetString("KITCHENROOT")
-	master := path.Join(root, "magic-people")
-	replica := path.Join(root, "magic-mix")
-	subfolders := []string{".koksmat/web/koksmat"} // , ".koksmat/web/koksmat/msal"}
+	master := path.Join(root, "magic-master")
+	replica := path.Join(root, "magic-files")
+	subfolders := []string{".koksmat/web/app/koksmat"} // , ".koksmat/web/koksmat/msal"}
 
-	_, err := Compare(master, replica, subfolders, true, *&CompareOptions{PrintResults: true})
+	result, err := Compare(master, replica, subfolders, true, *&CompareOptions{PrintResults: true, PrintMergeLink: true})
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
+	printJSON(result)
 }
 
 func TestCompare(t *testing.T) {
