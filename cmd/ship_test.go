@@ -3,6 +3,7 @@ package cmd
 import (
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,9 +28,19 @@ func TestBuildUrl(t *testing.T) {
 	assert.Exactly(t, url, "https://github.com/magicbutton/magic-mix/archive/refs/tags/v0.0.3.3.zip")
 }
 
-func TestSetupConnectors(t *testing.T) {
+func TestSetupConnectorsLocal(t *testing.T) {
 
-	err := SetupConnectors("./testconnectors")
+	err := SyncConnectorsWithMaster("./testroot")
+	if err != nil {
+		t.Error(err)
+	}
+
+}
+
+func TestSetupConnectorsRoot(t *testing.T) {
+	root := viper.GetString("KITCHENROOT")
+
+	err := SyncConnectorsWithMaster(root)
 	if err != nil {
 		t.Error(err)
 	}

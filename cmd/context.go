@@ -56,71 +56,19 @@ func MakeConnectionScript(connectionType string, script string) (string, error) 
 
 // serveCmd represents the serve command
 var initCmd = &cobra.Command{
-	Use:   "init [service]",
+	Use:   "init ",
 	Short: "init ",
 	Long:  ``,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("No service specified")
-			return
-		}
+
 		err := testContext()
 		if err != nil {
 			log.Fatalln("Cannot setup context file", err)
 		}
-		connectionType := args[0]
-		switch connectionType {
-		case "exchange":
-			log.Println("Exchange")
-			scriptPath, err := MakeConnectionScript(connectionType, `
+		root := viper.GetString("KITCHENROOT")
 
-$EXCHAPPID = $env:EXCHAPPID
-$EXCHORGANIZATION = $env:EXCHORGANIZATION
-$EXCHCERTIFICATEPASSWORD = $env:EXCHCERTIFICATEPASSWORD
-$EXCHCERTIFICATEPATH = "$PSScriptRoot/certificate.pfx"
-$bytes = [Convert]::FromBase64String($ENV:EXCHCERTIFICATE)
-[IO.File]::WriteAllBytes($EXCHCERTIFICATEPATH, $bytes)
-
-Write-Output "Connecting to Exchange for $EXCHORGANIZATION"
-
-if (($EXCHCERTIFICATEPASSWORD -ne $null) -and ($EXCHCERTIFICATEPASSWORD -ne "") ){
-	Connect-ExchangeOnline -CertificateFilePath $EXCHCERTIFICATEPATH  -AppID $EXCHAPPID -Organization $EXCHORGANIZATION -ShowBanner:$false -CertificatePassword (ConvertTo-SecureString -String $EXCHCERTIFICATEPASSWORD -AsPlainText -Force)
-}else{
-	Connect-ExchangeOnline -CertificateFilePath $EXCHCERTIFICATEPATH  -AppID $EXCHAPPID -Organization $EXCHORGANIZATION -ShowBanner:$false #   -BypassMailboxAnchoring:$true
-
-}							
-				`)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Connection script created at ", scriptPath)
-		case "sharepoint":
-			log.Println("Sharepoint")
-			scriptPath, err := MakeConnectionScript(connectionType, `
-
-$PNPAPPID=$env:PNPAPPID
-$PNPTENANTID=$env:PNPTENANTID
-$PNPCERTIFICATEPATH = "$($PSScriptRoot)/pnp.pfx"
-$PNPSITE=$env:PNPSITE
-$bytes = [Convert]::FromBase64String($ENV:PNPCERTIFICATE)
-[IO.File]::WriteAllBytes($PNPCERTIFICATEPATH, $bytes)
-
-write-output "Connecting to $PNPSITE"
-Connect-PnPOnline -Url $PNPSITE  -ClientId $PNPAPPID -Tenant $PNPTENANTID -CertificatePath "$PNPCERTIFICATEPATH"
-			
-							
-				`)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Connection script created at ", scriptPath)
-
-		default:
-
-			log.Fatalln("Unknown ", connectionType)
-			return
-		}
+		SyncConnectorsWithMaster(root)
 		//webserver.Run()
 	},
 }

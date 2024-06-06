@@ -15,6 +15,7 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/koksmat-com/koksmat/kitchen"
+	"github.com/koksmat-com/koksmat/repos"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -232,24 +233,30 @@ func Install() error {
 
 	return nil
 }
-func SetupConnectors(kitchenRoot string) error {
-	url := "https://github.com/koksmat-com/.koksmat/archive/refs/heads/master.zip"
-	color.White("Setting up connectors")
-	dest := ".koksmatroot.zip"
-	kitchen.Download(url, dest)
-	if kitchenRoot == "" {
-		kitchenRoot = viper.GetString("KITCHENROOT")
-		if kitchenRoot == "" {
-			kitchenRoot = "/kitchens"
-		}
-	}
-	kitchen.CreateIfNotExists(kitchenRoot, 0755)
+func SyncConnectorsWithMaster(kitchenRoot string) error {
+	source, err := repos.DownloadRepo("magicbutton", "magic-master")
+	master := path.Join(*source, ".koksmat", "kitchenroot")
+	replica := path.Join(kitchenRoot, ".koksmat")
 
-	err := Unzip(dest, kitchenRoot, ".koksmat")
+	kitchen.CreateIfNotExists(replica, 0755)
+
 	if err != nil {
 		return err
-
 	}
+	var subfolders = []string{
+		"tenants"}
+
+	j, err := kitchen.Compare(master, replica, subfolders, true, *&kitchen.CompareOptions{
+		CopyFunction: kitchen.Copy,
+		//MergeFunction: Merge,
+		PrintMergeLink: false,
+		PrintResults:   true})
+	if err != nil {
+		log.Fatal(err)
+	}
+	printJSON(j)
+	// kitchen := args[0]
+
 	return nil
 }
 func shipInstallCmd(cmd *cobra.Command, args []string) {

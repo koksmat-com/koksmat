@@ -13,10 +13,15 @@ type FileDiffPair struct {
 	Master  string
 	Replica string
 }
+
+type FileInfo struct {
+	FullPath     string
+	RelativePath string
+}
 type FileDiff struct {
 	Root               string
-	FilesOnlyInMaster  []string
-	FilesOnlyInReplica []string
+	FilesOnlyInMaster  []FileInfo
+	FilesOnlyInReplica []FileInfo
 
 	DifferentFiles []FileDiffPair
 }
@@ -63,7 +68,7 @@ func compareFolders(masterPath, replicaPath string, recurse bool) FileDiff {
 	// Compare master and replica files
 	for file := range masterFiles {
 		if !replicaFiles[file] {
-			diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, filepath.Join(masterPath, file))
+			diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, FileInfo{FullPath: filepath.Join(masterPath, file), RelativePath: file})
 		} else {
 			masterContent, _ := os.ReadFile(filepath.Join(masterPath, file))
 			replicaContent, _ := os.ReadFile(filepath.Join(replicaPath, file))
@@ -77,7 +82,7 @@ func compareFolders(masterPath, replicaPath string, recurse bool) FileDiff {
 	// Files present only in replica folder
 	for file := range replicaFiles {
 		if !masterFiles[file] {
-			diff.FilesOnlyInReplica = append(diff.FilesOnlyInReplica, filepath.Join(replicaPath, file))
+			diff.FilesOnlyInReplica = append(diff.FilesOnlyInReplica, FileInfo{FullPath: filepath.Join(replicaPath, file), RelativePath: file})
 		}
 	}
 
@@ -163,13 +168,12 @@ func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse
 		}
 	}
 
-	// Print results
-	for subfolder, diff := range comparisonResults {
+	for _, diff := range result {
 		if action.CopyFunction != nil {
 			for _, file := range diff.FilesOnlyInMaster {
 				// Copy file from master to replica
-				masterFile := filepath.Join(masterRoot, subfolder, file)
-				replicaFile := filepath.Join(replicaRoot, subfolder, file)
+				masterFile := file.FullPath
+				replicaFile := filepath.Join(replicaRoot, file.RelativePath)
 				fmt.Printf("Copying file '%s' to '%s'\n", masterFile, replicaFile)
 				// Read master file content
 				action.CopyFunction(masterFile, replicaFile)
