@@ -68,7 +68,7 @@ func KitchenUpdateCmd() *cobra.Command {
 	}
 
 	web := &cobra.Command{
-		Use:   "web master replica",
+		Use:   "web replica",
 		Short: "Web",
 		Long:  ``,
 		Example: `
@@ -76,25 +76,27 @@ Update the web folder of the replica kitchen with the web folder of the master k
 
 koksmat kitchen update web magic-people magic-files 
 		`,
-		Args: cobra.MinimumNArgs(2),
+		Args: cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			masterKitchen := args[0]
-			replicaKitchen := args[1]
+			kitchenName := args[0]
+			kitchenRoot := viper.GetString("KITCHENROOT")
 
-			root := viper.GetString("KITCHENROOT")
-			master := path.Join(root, masterKitchen)
-			replica := path.Join(root, replicaKitchen)
+			//source, err := repos.DownloadRepo("magicbutton", "magic-master")
+			master := path.Join(kitchenRoot, "magic-master") //path.Join(*source)
+			replica := path.Join(kitchenRoot, kitchenName)
 
-			_, err := kitchen.Compare(master, replica, subfolders, true, *&kitchen.CompareOptions{
-				CopyFunction: kitchen.Copy,
+			var subfolders = []string{
+				".koksmat/web/app/koksmat", ".koksmat/web/app/magic"}
+
+			j, err := kitchen.Compare(master, replica, subfolders, true, *&kitchen.CompareOptions{
+				//CopyFunction: kitchen.Copy,
 				//MergeFunction: Merge,
 				PrintMergeLink: false,
 				PrintResults:   true})
 			if err != nil {
 				log.Fatal(err)
 			}
-
-			// kitchen := args[0]
+			printJSON(j)
 
 		},
 	}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // FileDiff represents the differences between two folders
@@ -29,7 +30,9 @@ type FileDiff struct {
 // Walks through the folder and populates the files map
 func walkFolder(folderPath string, recurse bool) map[string]bool {
 	files := make(map[string]bool)
-
+	if !Exists(folderPath) {
+		return files
+	}
 	fileWalker := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			fmt.Printf("Error accessing file %s: %v\n", path, err)
@@ -58,17 +61,63 @@ func walkFolder(folderPath string, recurse bool) map[string]bool {
 	return files
 }
 
+// Reads .gitignore file and returns a list of patterns to ignore
+func readGitIgnore(filePath string) ([]string, error) {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(string(content), "\n")
+	var patterns []string
+	for _, line := range lines {
+		if strings.TrimSpace(line) != "" && !strings.HasPrefix(line, "#") {
+			patterns = append(patterns, line)
+		}
+	}
+	return patterns, nil
+}
+
+// Checks if a file matches any of the patterns in the ignore list
+func fileMatchesIgnoreList(filePath string, ignoreList []string) bool {
+	for _, pattern := range ignoreList {
+		match, _ := filepath.Match(pattern, filePath)
+		if match {
+			return true
+		}
+		// Check for patterns with directory wildcards
+		if strings.HasSuffix(pattern, "/**/*") {
+			// Trim  "/*" suffix
+			prefix := strings.TrimSuffix(pattern, "/**/*")
+			if strings.HasPrefix(filePath, prefix) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // Compares two folders and returns the differences
 func compareFolders(masterPath, replicaPath string, recurse bool) FileDiff {
 	masterFiles := walkFolder(masterPath, recurse)
+
 	replicaFiles := walkFolder(replicaPath, recurse)
 
 	diff := FileDiff{}
-
+	// Read .gitignore file in master folder and create ignore list
+	masterIgnoreList := []string{}
+	masterGitIgnorePath := filepath.Join(masterPath, ".koksmatignore")
+	if _, err := os.Stat(masterGitIgnorePath); err == nil {
+		masterIgnoreList, err = readGitIgnore(masterGitIgnorePath)
+		if err != nil {
+			return FileDiff{}
+		}
+	}
 	// Compare master and replica files
 	for file := range masterFiles {
 		if !replicaFiles[file] {
-			diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, FileInfo{FullPath: filepath.Join(masterPath, file), RelativePath: file})
+			if !fileMatchesIgnoreList(file, masterIgnoreList) {
+				diff.FilesOnlyInMaster = append(diff.FilesOnlyInMaster, FileInfo{FullPath: filepath.Join(masterPath, file), RelativePath: file})
+			}
 		} else {
 			masterContent, _ := os.ReadFile(filepath.Join(masterPath, file))
 			replicaContent, _ := os.ReadFile(filepath.Join(replicaPath, file))

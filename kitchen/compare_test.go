@@ -45,7 +45,7 @@ func TestCompareKitchens2(t *testing.T) {
 	root := viper.GetString("KITCHENROOT")
 	master := path.Join(root, "magic-master")
 	replica := path.Join(root, "magic-files")
-	subfolders := []string{".koksmat/web/app/koksmat"} // , ".koksmat/web/koksmat/msal"}
+	subfolders := []string{".koksmat/web/app/koksmat", ".koksmat/web/app/magic"} // , ".koksmat/web/koksmat/msal"}
 
 	result, err := Compare(master, replica, subfolders, true, *&CompareOptions{PrintResults: true, PrintMergeLink: true})
 	if err != nil {

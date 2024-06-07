@@ -235,8 +235,8 @@ func Install() error {
 }
 func SyncConnectorsWithMaster(kitchenRoot string) error {
 	source, err := repos.DownloadRepo("magicbutton", "magic-master")
-	master := path.Join(*source, ".koksmat", "kitchenroot")
-	replica := path.Join(kitchenRoot, ".koksmat")
+	master := path.Join(*source, ".koksmat", "deploy")
+	replica := path.Join(kitchenRoot)
 
 	kitchen.CreateIfNotExists(replica, 0755)
 
@@ -244,7 +244,7 @@ func SyncConnectorsWithMaster(kitchenRoot string) error {
 		return err
 	}
 	var subfolders = []string{
-		"tenants"}
+		".koksmat"}
 
 	j, err := kitchen.Compare(master, replica, subfolders, true, *&kitchen.CompareOptions{
 		CopyFunction: kitchen.Copy,
