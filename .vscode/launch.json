@@ -68,12 +68,12 @@
             "args": ["sail"]
         },
         {
-            "name": "Sockets API",
+            "name": "Serve",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["serve","sockets"]
+            "args": ["serve"]
         },        
         {
             "name": "Sync Audit logs",
