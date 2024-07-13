@@ -44,10 +44,10 @@ func TestCompareKitchens2(t *testing.T) {
 	t.Log("Compare")
 	root := viper.GetString("KITCHENROOT")
 	master := path.Join(root, "magic-master")
-	replica := path.Join(root, "magic-files")
+	replica := path.Join(root, "magic-mix")
 	subfolders := []string{".koksmat/web/app/koksmat", ".koksmat/web/app/magic"} // , ".koksmat/web/koksmat/msal"}
 
-	result, err := Compare(master, replica, subfolders, true, *&CompareOptions{PrintResults: true, PrintMergeLink: true})
+	result, err := Compare(master, replica, subfolders, true, *&CompareOptions{CopyFunction: Copy, PrintResults: true, PrintMergeLink: true})
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}

@@ -52,12 +52,30 @@
         }
         ,
         {
+            "name": "Add Test",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/.koksmat/web",
+            "args": ["add","ddsfdsfdsf"]
+        }
+        ,
+        {
             "name": "Admin API",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
             "args": ["serve","admin"]
+        },
+        {
+            "name": "Autopilot run",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["auto","run"]
         },
         {
             "name": "Mate Sail API",

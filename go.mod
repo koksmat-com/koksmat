@@ -84,6 +84,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
+	github.com/nsf/termbox-go v1.1.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/otiai10/copy v1.14.0
 	github.com/pelletier/go-toml/v2 v2.0.9 // indirect

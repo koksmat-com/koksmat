@@ -442,6 +442,5 @@ func init() {
 
 	bootCmd.Flags().BoolVarP(&verbose, "verbose", "", false, "Verbose")
 
-	kitchenCmd.AddCommand(KitchenCompareCmd())
-	kitchenCmd.AddCommand(KitchenUpdateCmd())
+	
 }

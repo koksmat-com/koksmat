@@ -222,7 +222,7 @@ func Compare(masterRoot string, replicaRoot string, subfolders []string, recurse
 			for _, file := range diff.FilesOnlyInMaster {
 				// Copy file from master to replica
 				masterFile := file.FullPath
-				replicaFile := filepath.Join(replicaRoot, file.RelativePath)
+				replicaFile := filepath.Join(replicaRoot, diff.Root, file.RelativePath)
 				fmt.Printf("Copying file '%s' to '%s'\n", masterFile, replicaFile)
 				// Read master file content
 				action.CopyFunction(masterFile, replicaFile)
