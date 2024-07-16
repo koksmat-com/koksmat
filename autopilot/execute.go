@@ -46,7 +46,9 @@ func ExecuteCommand(cmd string, args []string, options Options, callback func(is
 	readPipe := func(pipe *bufio.Scanner, isStdOut bool) {
 		for pipe.Scan() {
 			line := pipe.Text()
-			callback(isStdOut, line)
+			if callback != nil {
+				callback(isStdOut, line)
+			}
 			combinedOutput.WriteString(line + "\n")
 		}
 	}

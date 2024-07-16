@@ -16,21 +16,28 @@ import (
 type Request struct {
 	Action  string   `json:"action"`
 	Command string   `json:"command"`
+	ReplyTo string   `json:"reply_to"`
 	Args    []string `json:"args"`
 }
 
 type PartialResponse struct {
 	SessionID string `json:"session_id"`
+	Type      string `json:"type"`
+	ReplyTo   string `json:"reply_to"`
 	Body      string `json:"body"`
 }
 
 type ErrorResponse struct {
 	SessionID    string `json:"session_id"`
+	Type         string `json:"type"`
+	ReplyTo      string `json:"reply_to"`
 	ErrorMessage string `json:"error_message"`
 }
 
 type CompleteResponse struct {
 	SessionID string `json:"session_id"`
+	Type      string `json:"type"`
+	ReplyTo   string `json:"reply_to"`
 	Body      string `json:"body"`
 }
 
@@ -84,8 +91,12 @@ func Run(sessionId string) {
 		}
 
 		switch request.Action {
+		case "ping":
+			handlePing(sessionId, request, rooturl, bearerToken)
 		case "execute":
 			handleExecute(sessionId, request, rooturl, bearerToken)
+		case "execute-nostream":
+			handleExecuteNoStream(sessionId, request, rooturl, bearerToken)
 		default:
 			log.Println("Unknown command:", request.Command)
 		}
@@ -128,6 +139,7 @@ func handleExecute(sessionId string, request Request, rooturl string, bearerToke
 		if isStdOut {
 			//log.Println(output)
 			postPartialResponse(rooturl, bearerToken, PartialResponse{
+				Type:      "append",
 				SessionID: sessionId,
 				Body:      output,
 			},
@@ -135,6 +147,7 @@ func handleExecute(sessionId string, request Request, rooturl string, bearerToke
 		} else {
 			log.Println("Error:", output)
 			postPartialResponse(rooturl, bearerToken, PartialResponse{
+				Type:      "append",
 				SessionID: sessionId,
 				Body:      output,
 			},
@@ -142,30 +155,61 @@ func handleExecute(sessionId string, request Request, rooturl string, bearerToke
 
 		}
 	}
+
 	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: ""}, callback)
 
 	if err != nil {
 		log.Println("Error executing command:", err)
 		postErrorResponse(rooturl, bearerToken, ErrorResponse{
+			Type:         "error",
 			SessionID:    sessionId,
 			ErrorMessage: fmt.Sprintf("Error executing command: %s", err),
 		})
 		return
 	}
 	postResponse(rooturl, bearerToken, CompleteResponse{
+		Type:      "done",
 		SessionID: sessionId,
 		Body:      *result,
 	})
 
-	// err := postPartialResponse("YOUR_POST_URL_HERE", "YOUR_BEARER_TOKEN_HERE", PartialResponse{
-	// 	SessionID: sessionID,
-	// 	Body:      "Partial response body for COMMAND_A",
-	// })
-	// if err != nil {
-	// 	log.Println("Error posting partial response:", err)
-	// }
 }
+func handleExecuteNoStream(sessionId string, request Request, rooturl string, bearerToken string) {
+	// Implement your logic for COMMAND_A here
+	log.Println("Handling request for session:", sessionId)
 
+	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: ""}, nil)
+
+	if err != nil {
+		log.Println("Error executing command:", err)
+		postErrorResponse(rooturl, bearerToken, ErrorResponse{
+			Type:         "error",
+			SessionID:    sessionId,
+			ReplyTo:      request.ReplyTo,
+			ErrorMessage: fmt.Sprintf("Error executing command: %s", err),
+		})
+		return
+	}
+	postResponse(rooturl, bearerToken, CompleteResponse{
+		Type:      "done",
+		ReplyTo:   request.ReplyTo,
+		SessionID: sessionId,
+		Body:      *result,
+	})
+
+}
+func handlePing(sessionId string, request Request, rooturl string, bearerToken string) {
+
+	log.Println("Handling ping request for session:", sessionId)
+
+	postResponse(rooturl, bearerToken, CompleteResponse{
+		Type:      "done",
+		SessionID: sessionId,
+		ReplyTo:   request.ReplyTo,
+		Body:      "pong",
+	})
+
+}
 func postPartialResponse(url, bearerToken string, response PartialResponse) error {
 	return postResponseHelper(url, bearerToken, response)
 }
