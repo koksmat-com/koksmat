@@ -14,10 +14,12 @@ import (
 )
 
 type Request struct {
-	Action  string   `json:"action"`
-	Command string   `json:"command"`
-	ReplyTo string   `json:"reply_to"`
-	Args    []string `json:"args"`
+	Action       string   `json:"action"`
+	Command      string   `json:"command"`
+	ReplyTo      string   `json:"reply_to"`
+	Args         []string `json:"args"`
+	Cwd          string   `json:"cwd"`
+	Errormessage string   `json:"errormessage"`
 }
 
 type PartialResponse struct {
@@ -82,22 +84,27 @@ func Run(sessionId string) {
 		}
 
 		var request Request
-		log.Println("Request:", string(requestResponse))
+
 		err = json.Unmarshal(requestResponse, &request)
 		if err != nil {
 			log.Println("Error unmarshalling response:", err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
-
+		if request.Errormessage == "timeout" {
+			log.Println("No request found, waiting for new request")
+			continue
+		}
+		log.Println("Request:", string(requestResponse))
 		switch request.Action {
 		case "ping":
-			handlePing(sessionId, request, rooturl, bearerToken)
+			go handlePing(sessionId, request, rooturl, bearerToken)
 		case "execute":
-			handleExecute(sessionId, request, rooturl, bearerToken)
+			go handleExecute(sessionId, request, rooturl, bearerToken)
 		case "execute-nostream":
-			handleExecuteNoStream(sessionId, request, rooturl, bearerToken)
+			go handleExecuteNoStream(sessionId, request, rooturl, bearerToken)
 		default:
+
 			log.Println("Unknown command:", request.Command)
 		}
 
@@ -178,7 +185,7 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 	// Implement your logic for COMMAND_A here
 	log.Println("Handling request for session:", sessionId)
 
-	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: ""}, nil)
+	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: request.Cwd}, nil)
 
 	if err != nil {
 		log.Println("Error executing command:", err)
