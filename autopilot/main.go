@@ -185,7 +185,27 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 	// Implement your logic for COMMAND_A here
 	log.Println("Handling request for session:", sessionId)
 
-	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: request.Cwd}, nil)
+	callback := func(isStdOut bool, output string) {
+		if isStdOut {
+			// //log.Println(output)
+			// postPartialResponse(rooturl, bearerToken, PartialResponse{
+			// 	Type:      "append",
+			// 	SessionID: sessionId,
+			// 	Body:      output,
+			// },
+			// )
+		} else {
+			log.Println("Error:", output)
+			// postPartialResponse(rooturl, bearerToken, PartialResponse{
+			// 	Type:      "append",
+			// 	SessionID: sessionId,
+			// 	Body:      output,
+			// },
+			// )
+
+		}
+	}
+	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: request.Cwd}, callback)
 
 	if err != nil {
 		log.Println("Error executing command:", err)
