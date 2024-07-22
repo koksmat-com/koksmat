@@ -34,6 +34,7 @@ type ErrorResponse struct {
 	Type         string `json:"type"`
 	ReplyTo      string `json:"reply_to"`
 	ErrorMessage string `json:"error_message"`
+	Body         string `json:"body"`
 }
 
 type CompleteResponse struct {
@@ -88,6 +89,7 @@ func Run(sessionId string) {
 		err = json.Unmarshal(requestResponse, &request)
 		if err != nil {
 			log.Println("Error unmarshalling response:", err)
+			log.Println("Response:", string(requestResponse))
 			time.Sleep(1 * time.Second)
 			continue
 		}
@@ -103,6 +105,8 @@ func Run(sessionId string) {
 			go handleExecute(sessionId, request, rooturl, bearerToken)
 		case "execute-nostream":
 			go handleExecuteNoStream(sessionId, request, rooturl, bearerToken)
+		case "write":
+			go handleWrite(sessionId, request, rooturl, bearerToken)
 		default:
 
 			log.Println("Unknown command:", request.Command)
@@ -213,6 +217,7 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 			Type:         "error",
 			SessionID:    sessionId,
 			ReplyTo:      request.ReplyTo,
+			Body:         *result,
 			ErrorMessage: fmt.Sprintf("Error executing command: %s", err),
 		})
 		return
@@ -225,6 +230,7 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 	})
 
 }
+
 func handlePing(sessionId string, request Request, rooturl string, bearerToken string) {
 
 	log.Println("Handling ping request for session:", sessionId)
@@ -234,6 +240,24 @@ func handlePing(sessionId string, request Request, rooturl string, bearerToken s
 		SessionID: sessionId,
 		ReplyTo:   request.ReplyTo,
 		Body:      "pong",
+	})
+
+}
+
+func handleWrite(sessionId string, request Request, rooturl string, bearerToken string) {
+
+	log.Println("Handling write request for session:", sessionId)
+	req := WriteRequest{}
+	json.Unmarshal([]byte(request.Args[0]), &req)
+
+	statuses, _ := handleFileWriteRequest(req)
+
+	body, _ := json.Marshal(statuses)
+	postResponse(rooturl, bearerToken, CompleteResponse{
+		Type:      "done",
+		SessionID: sessionId,
+		ReplyTo:   request.ReplyTo,
+		Body:      string(body),
 	})
 
 }
