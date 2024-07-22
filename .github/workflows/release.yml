@@ -26,7 +26,15 @@ jobs:
       with:
         name: mac-build
         path: koksmat
-
+    - name: Upload Release Asset
+    
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./koksmat
+        asset_name: koksmat
+        asset_content_type: application/octet-stream
+  
   build-windows:
     runs-on: windows-latest
 
@@ -48,3 +56,10 @@ jobs:
       with:
         name: windows-build
         path: koksmat.exe
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./koksmat.exe
+        asset_name: koksmat.exe
+        asset_content_type: application/octet-stream
