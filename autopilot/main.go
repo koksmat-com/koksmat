@@ -3,6 +3,7 @@ package autopilot
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -44,10 +45,28 @@ type CompleteResponse struct {
 	Body      string `json:"body"`
 }
 
+func List() ([]string, error) {
+	token := auth.GetToken()
+	if token == nil {
+		log.Fatal("Error getting token")
+	}
+	bearerToken := token.AccessToken
+	rooturl := viper.GetString("STUDIO_URL")
+	url := fmt.Sprintf("%s/api/workspace", rooturl)
+	//log.Println("Studio URL:", url)
+	requestResponse, err := makeRequest(url, bearerToken)
+	if err != nil {
+		//log.Println("Error getting workspaces", err)
+		return nil, errors.New("Error getting workspaces")
+	}
+	response := []string{}
+	err = json.Unmarshal(requestResponse, &response)
+	return response, err
+}
 func Run(sessionId string) {
 	log.Println("Running auto pilot mode with id:", sessionId)
 	rooturl := viper.GetString("STUDIO_URL")
-	url := fmt.Sprintf("%s/session/%s", rooturl, sessionId)
+	url := fmt.Sprintf("%s/api/autopilot/session/%s", rooturl, sessionId)
 	log.Println("Studio URL:", url)
 	var bearerToken string
 	ticker := time.NewTicker(10 * time.Minute)
@@ -189,27 +208,32 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 	// Implement your logic for COMMAND_A here
 	log.Println("Handling request for session:", sessionId)
 
-	callback := func(isStdOut bool, output string) {
-		if isStdOut {
-			// //log.Println(output)
-			// postPartialResponse(rooturl, bearerToken, PartialResponse{
-			// 	Type:      "append",
-			// 	SessionID: sessionId,
-			// 	Body:      output,
-			// },
-			// )
-		} else {
-			log.Println("Error:", output)
-			// postPartialResponse(rooturl, bearerToken, PartialResponse{
-			// 	Type:      "append",
-			// 	SessionID: sessionId,
-			// 	Body:      output,
-			// },
-			// )
+	// callback := func(isStdOut bool, output string) {
+	// 	//return
+	// 	url := fmt.Sprintf("%s/api/autopilot", rooturl)
+	// 	if isStdOut {
+	// 		log.Println(output)
+	// 		postPartialResponse(url, bearerToken, PartialResponse{
+	// 			Type:      "append",
+	// 			SessionID: sessionId,
+	// 			ReplyTo:   request.ReplyTo + ".echo",
+	// 			Body:      output,
+	// 		},
+	// 		)
+	// 	} else {
+	// 		log.Println("Error:", output)
+	// 		postPartialResponse(url, bearerToken, PartialResponse{
+	// 			Type:      "append",
+	// 			SessionID: sessionId,
+	// 			ReplyTo:   request.ReplyTo + ".echo",
+	// 			Body:      output,
+	// 		},
+	// 		)
 
-		}
-	}
-	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: request.Cwd}, callback)
+	// 	}
+	// }
+	result, err := Execute(request.Command, request.Args, Options{Timeout: 30, Cwd: request.Cwd}, nil) //callback)
+	url := fmt.Sprintf("%s/api/autopilot", rooturl)
 
 	if err != nil {
 		log.Println("Error executing command:", err)
@@ -222,7 +246,7 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 		})
 		return
 	}
-	postResponse(rooturl, bearerToken, CompleteResponse{
+	postResponse(url, bearerToken, CompleteResponse{
 		Type:      "done",
 		ReplyTo:   request.ReplyTo,
 		SessionID: sessionId,
@@ -262,6 +286,7 @@ func handleWrite(sessionId string, request Request, rooturl string, bearerToken 
 
 }
 func postPartialResponse(url, bearerToken string, response PartialResponse) error {
+
 	return postResponseHelper(url, bearerToken, response)
 }
 

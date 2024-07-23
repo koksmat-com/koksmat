@@ -17,7 +17,11 @@ var autopilotCmd = &cobra.Command{
 	Use:   "auto ",
 	Short: "Auto pilot mode",
 	Args:  cobra.MinimumNArgs(0),
-	Long:  ``,
+	Long: `
+	
+	
+	
+	`,
 
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	subscriptions, err := auth.GetSubscriptions()

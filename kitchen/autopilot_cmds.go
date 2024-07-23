@@ -10,7 +10,7 @@ func AutoPilotRun(id string) (string, error) {
 	// Run the auto pilot mode
 
 	autopilot.Run(id)
-	return "", errors.New("Not implemented")
+	return "Some how exited", nil
 }
 
 func HasAutopilotConnection() (bool, error) {
@@ -30,7 +30,8 @@ func RemoveAutopilotConnection(id string) error {
 
 func ListAutopilotConnections() ([]string, error) {
 	// List all connections to Koksmat Studio
-	return nil, errors.New("Not implemented")
+	return autopilot.List()
+
 }
 
 func GetAutopilotConnection(id string) (string, error) {
