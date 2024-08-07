@@ -75,7 +75,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["auto","run"]
+            "args": ["auto","run","auto"]
         },
         {
             "name": "Autopilot list",

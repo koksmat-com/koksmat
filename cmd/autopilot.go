@@ -39,16 +39,23 @@ func init() {
 
 	rootCmd.AddCommand(autopilotCmd)
 	autopilotCmd.AddCommand(&cobra.Command{
-		Use: "run ",
+		Use: "run [connectionId]",
 
-		Args: cobra.MinimumNArgs(0),
-		Long: ``,
+		Args:    cobra.MinimumNArgs(0),
+		Long:    ``,
+		Example: `koksmat auto run`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			connectionId := ""
+			if len(args) == 0 {
 
-			connectionId, err := kitchen.GetAutopilotDefaultConnection()
-			if err != nil {
-				log.Fatal(err)
+				defaultConnectionId, err := kitchen.GetAutopilotDefaultConnection()
+				connectionId = defaultConnectionId
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else {
+				connectionId = args[0]
 			}
 			kitchen.AutoPilotRun(connectionId)
 		},
