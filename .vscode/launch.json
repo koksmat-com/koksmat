@@ -70,12 +70,28 @@
             "args": ["serve","admin"]
         },
         {
-            "name": "Autopilot run",
+            "name": "Autopilot run local",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["auto","run","auto"]
+            "args": ["auto","run","auto","http://localhost:4339"]
+        },
+        {
+            "name": "Autopilot run canary",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["auto","run","auto","https://nexi-intra-magic-studio-canary.intra.nexigroup.com"]
+        },
+        {
+            "name": "Autopilot pwsh",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["auto","pwsh","host","--connectionId","123"]
         },
         {
             "name": "Autopilot list",

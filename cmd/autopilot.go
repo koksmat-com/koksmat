@@ -39,13 +39,14 @@ func init() {
 
 	rootCmd.AddCommand(autopilotCmd)
 	autopilotCmd.AddCommand(&cobra.Command{
-		Use: "run [connectionId]",
+		Use: "run [connectionId] [[studiourl]]",
 
 		Args:    cobra.MinimumNArgs(0),
 		Long:    ``,
 		Example: `koksmat auto run`,
 
 		Run: func(cmd *cobra.Command, args []string) {
+			studioUrl := ""
 			connectionId := ""
 			if len(args) == 0 {
 
@@ -57,7 +58,32 @@ func init() {
 			} else {
 				connectionId = args[0]
 			}
-			kitchen.AutoPilotRun(connectionId)
+			if len(args) > 1 {
+				studioUrl = args[1]
+			}
+			kitchen.AutoPilotRun(connectionId, studioUrl)
+		},
+	})
+
+	pwshCmd := &cobra.Command{
+		Use:              "pwsh ",
+		TraverseChildren: true,
+	}
+
+	var connectionId string
+	pwshCmd.PersistentFlags().StringVarP(&connectionId, "connectionId", "c", "", "Connection id")
+	autopilotCmd.AddCommand(pwshCmd)
+
+	pwshCmd.AddCommand(&cobra.Command{
+		Use: "host",
+
+		Args:    cobra.MinimumNArgs(0),
+		Long:    ``,
+		Example: `koksmat auto pwsh host connect-exchangeonline -connectionId 124`,
+
+		Run: func(cmd *cobra.Command, args []string) {
+
+			kitchen.PowerShellHost(connectionId, args)
 		},
 	})
 

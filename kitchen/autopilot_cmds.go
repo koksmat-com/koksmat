@@ -6,13 +6,17 @@ import (
 	"github.com/koksmat-com/koksmat/autopilot"
 )
 
-func AutoPilotRun(id string) (string, error) {
+func AutoPilotRun(id string, studioUrl string) (string, error) {
 	// Run the auto pilot mode
 
-	autopilot.Run(id)
+	autopilot.Run(id, studioUrl)
 	return "Some how exited", nil
 }
 
+func PowerShellHost(sessionId string, bootCommands []string) error {
+	// Start the PowerShell host
+	return autopilot.PowerShellHost(bootCommands, sessionId)
+}
 func HasAutopilotConnection() (bool, error) {
 	// Check if the user has a connection to Koksmat Studio
 	return false, errors.New("Not implemented")

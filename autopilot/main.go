@@ -63,9 +63,11 @@ func List() ([]string, error) {
 	err = json.Unmarshal(requestResponse, &response)
 	return response, err
 }
-func Run(sessionId string) {
+func Run(sessionId string, rooturl string) {
 	log.Println("Running auto pilot mode with id:", sessionId)
-	rooturl := viper.GetString("STUDIO_URL")
+	if rooturl == "" {
+		rooturl = viper.GetString("STUDIO_URL")
+	}
 	url := fmt.Sprintf("%s/api/autopilot/session/%s", rooturl, sessionId)
 	log.Println("Studio URL:", url)
 	var bearerToken string
@@ -124,6 +126,8 @@ func Run(sessionId string) {
 			go handleExecute(sessionId, request, rooturl, bearerToken)
 		case "execute-nostream":
 			go handleExecuteNoStream(sessionId, request, rooturl, bearerToken)
+		// case "powershellsession":
+		// 	go handlePowerShellHost(sessionId, request, rooturl, bearerToken)
 		case "write":
 			go handleWrite(sessionId, request, rooturl, bearerToken)
 		default:
@@ -241,7 +245,7 @@ func handleExecuteNoStream(sessionId string, request Request, rooturl string, be
 			Type:         "error",
 			SessionID:    sessionId,
 			ReplyTo:      request.ReplyTo,
-			Body:         *result,
+			Body:         "",
 			ErrorMessage: fmt.Sprintf("Error executing command: %s", err),
 		})
 		return
