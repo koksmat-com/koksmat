@@ -22,10 +22,10 @@ builds:
       - linux
       - windows
       - darwin
-    goarch:
-      - amd64
-      - arm64
-      - "386"
+    # goarch:
+    #   - amd64
+    #   - arm64
+    #   - "386"
     ignore:
       - goos: linux
 
