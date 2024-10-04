@@ -2,3 +2,4 @@ koksmat
 .env*
 **/**/*.pfx
 __debug_bin
+dist/

@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/koksmat-com/koksmat/auth"
+	"github.com/koksmat-com/koksmat/input"
 	"github.com/koksmat-com/koksmat/kitchen"
 	"github.com/spf13/cobra"
 )
@@ -113,11 +114,11 @@ func init() {
 			if token == nil {
 				log.Fatal("Error getting token")
 			}
-
-			_, err := kitchen.AddAutopilotConnection(token.AccessToken, "https://koksmat.com")
-			if err != nil {
-				log.Fatal(err)
-			}
+			input.Confirm()
+			// _, err := kitchen.AddAutopilotConnection(token.AccessToken, "https://koksmat.com")
+			// if err != nil {
+			// 	log.Fatal(err)
+			// }
 		},
 	})
 
