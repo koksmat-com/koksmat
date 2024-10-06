@@ -39,6 +39,7 @@ var autopilotCmd = &cobra.Command{
 func init() {
 
 	rootCmd.AddCommand(autopilotCmd)
+	autopilotCmd.AddCommand(kitchen.NewAutopilotConfigRootCommand())
 	autopilotCmd.AddCommand(&cobra.Command{
 		Use: "run [connectionId] [[studiourl]]",
 

@@ -1,0 +1,5 @@
+hosts:
+  auto:
+    href: http://test.com
+    key: test-key
+default_host: ""

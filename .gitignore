@@ -3,3 +3,4 @@ koksmat
 **/**/*.pfx
 __debug_bin
 dist/
+koksmat_config.yaml
