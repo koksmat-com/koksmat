@@ -28,11 +28,14 @@ jobs:
         run: |
           iscc myprogram.iss
 
+      - name: List files after building installer
+        run: dir
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: installer
-          path: koksmat-installer.exe
+          path: ./koksmat-installer.exe  # Ensure this matches your output
 
   release:
     needs: build

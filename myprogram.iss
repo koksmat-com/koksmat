@@ -4,6 +4,7 @@ AppVersion=1.0.0
 DefaultDirName={autopf}\koksmat
 DefaultGroupName=Koksmat
 OutputBaseFilename=koksmat-installer
+OutputDir=.
 Compression=lzma
 SolidCompression=yes
 
