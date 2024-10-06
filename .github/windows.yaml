@@ -1,0 +1,55 @@
+name: Build Windows Installer and Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Build Go program
+        run: go build -o bin/koksmat.exe
+
+      - name: Install Inno Setup
+        run: choco install -y innosetup
+
+      - name: Generate Windows Installer
+        run: |
+          iscc myprogram.iss
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: installer
+          path: koksmat-installer.exe
+
+  release:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: installer
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./koksmat-installer.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
