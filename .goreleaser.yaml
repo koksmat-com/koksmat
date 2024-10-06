@@ -22,12 +22,12 @@ builds:
       - linux
       #- windows
       #- darwin
-    # goarch:
-    #   - amd64
+    goarch:
+      - amd64
     #   - arm64
     #   - "386"
-    ignore:
-      - goos: linux
+    #ignore:
+    #  - goos: linux
 
 archives:
   - format: tar.gz
