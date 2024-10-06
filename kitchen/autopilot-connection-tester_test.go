@@ -2,6 +2,7 @@ package kitchen
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -52,7 +53,7 @@ func TestRegisterConnection(t *testing.T) {
 	}
 	tester := NewAutopilotConnectionTester(config, "test-token")
 
-	err := tester.RegisterConnection()
+	err := tester.RegisterConnection("test-key", "test-secret")
 	if err != nil {
 		t.Fatalf("RegisterConnection failed: %v", err)
 	}
@@ -104,8 +105,14 @@ func TestPostRequest(t *testing.T) {
 		Key:  "test-key",
 	}
 	tester := NewAutopilotConnectionTester(config, "test-token")
-
-	err := tester.PostRequest(map[string]string{"key": "value"})
+	data := map[string]string{"key": "value"}
+	// Marshal the map into a JSON byte slice
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshalling:", err)
+		return
+	}
+	err = tester.PostRequest(jsonData)
 	if err != nil {
 		t.Fatalf("PostRequest failed: %v", err)
 	}

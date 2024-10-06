@@ -2,8 +2,10 @@ package kitchen
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/koksmat-com/koksmat/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +20,7 @@ as well as for testing connections using the AutopilotConnectionTester.
 
 var (
 	configFile string
-	jwtToken   string
+	//jwtToken   string
 )
 
 // NewRootCommand creates the root command for the CLI
@@ -30,7 +32,7 @@ func NewAutopilotConfigRootCommand() *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "koksmat_config.yaml", "config file (default is koksmat_config.yaml)")
-	rootCmd.PersistentFlags().StringVar(&jwtToken, "token", "", "JWT token for authentication")
+	//rootCmd.PersistentFlags().StringVar(&jwtToken, "token", "", "JWT token for authentication")
 
 	rootCmd.AddCommand(newListCommand())
 	rootCmd.AddCommand(newAddCommand())
@@ -194,6 +196,12 @@ func newTestCommand() *cobra.Command {
 		Use:   "test",
 		Short: "Test connection to a host",
 		Run: func(cmd *cobra.Command, args []string) {
+			// Initial token retrieval
+			token := auth.GetToken()
+			if token == nil {
+				log.Fatal("Error getting token")
+			}
+			jwtToken := token.AccessToken
 			hosts := NewKoksmatAutoPilotHosts()
 			err := hosts.LoadFromFile(configFile)
 			if err != nil {
@@ -218,7 +226,7 @@ func newTestCommand() *cobra.Command {
 			fmt.Println("Ping successful")
 
 			fmt.Println("Registering connection...")
-			err = tester.RegisterConnection()
+			err = tester.RegisterConnection(tag, hostConfig.Key)
 			if err != nil {
 				fmt.Printf("Registration failed: %v\n", err)
 				return

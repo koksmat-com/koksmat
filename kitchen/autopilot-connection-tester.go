@@ -36,9 +36,26 @@ func NewAutopilotConnectionTester(config KoksmatAutoPilotHostConfig, jwtToken st
 }
 
 // RegisterConnection registers a new connection with the AutoPilot host
-func (a *AutopilotConnectionTester) RegisterConnection() error {
+func (a *AutopilotConnectionTester) RegisterConnection(key, clientSecret string) error {
 	url := fmt.Sprintf("%s/api/autopilot/register", a.config.Href)
-	return a.sendRequest("POST", url, nil)
+
+	// Create the request body
+	requestBody := struct {
+		Key          string `json:"key"`
+		ClientSecret string `json:"clientSecret"`
+	}{
+		Key:          key,
+		ClientSecret: clientSecret,
+	}
+
+	// Convert the request body to JSON
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request body: %v", err)
+	}
+
+	// Send the POST request with the JSON body
+	return a.sendRequest("POST", url, jsonBody)
 }
 
 // Ping sends a ping request to the AutoPilot host
@@ -48,9 +65,9 @@ func (a *AutopilotConnectionTester) Ping() error {
 }
 
 // PostRequest sends a POST request to the AutoPilot host
-func (a *AutopilotConnectionTester) PostRequest(data interface{}) error {
+func (a *AutopilotConnectionTester) PostRequest(body []byte) error {
 	url := fmt.Sprintf("%s/api/autopilot/request", a.config.Href)
-	return a.sendRequest("POST", url, data)
+	return a.sendRequest("POST", url, body)
 }
 
 // GetStatus retrieves the status from the AutoPilot host
@@ -64,22 +81,15 @@ func (a *AutopilotConnectionTester) GetStatus() (string, error) {
 }
 
 // sendRequest sends an HTTP request to the specified URL
-func (a *AutopilotConnectionTester) sendRequest(method, url string, data interface{}) error {
-	_, err := a.sendRequestWithResponse(method, url, data)
+func (a *AutopilotConnectionTester) sendRequest(method, url string, body []byte) error {
+	_, err := a.sendRequestWithResponse(method, url, body)
 	return err
 }
 
 // sendRequestWithResponse sends an HTTP request and returns the response body
-func (a *AutopilotConnectionTester) sendRequestWithResponse(method, url string, data interface{}) ([]byte, error) {
-	var body []byte
-	var err error
+func (a *AutopilotConnectionTester) sendRequestWithResponse(method, url string, body []byte) ([]byte, error) {
 
-	if data != nil {
-		body, err = json.Marshal(data)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal request data: %v", err)
-		}
-	}
+	var err error
 
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(body))
 	if err != nil {
