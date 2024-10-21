@@ -2,7 +2,7 @@ name: "Epic Request"
 description: "Submit a request for a new Epic."
 title: "[Epic]: "
 type: Feature 
-projects: koksmat-com/4
+projects: 4
 assignees: []
 body:
   - type: markdown
