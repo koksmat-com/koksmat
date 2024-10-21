@@ -1,0 +1,20 @@
+name: "Epic Request"
+description: "Submit a request for a new Epic."
+title: "[Epic]: "
+type: Feature 
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Epic Description
+        Please provide a detailed description of the Epic you'd like to see implemented.
+
+  - type: input
+    id: Epic_overview
+    attributes:
+      label: "Overview"
+      description: "Provide a concise summary of the Epic. What is the problem or opportunity it will address?"
+      placeholder: "Epic overview..."
+
+  
